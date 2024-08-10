@@ -1,4 +1,4 @@
-package notification;
+package com.first_chat.publisher;
 
 import java.io.Serializable;
 

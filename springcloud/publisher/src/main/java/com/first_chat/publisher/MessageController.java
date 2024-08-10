@@ -1,10 +1,7 @@
 package com.first_chat.publisher;
 
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 public class MessageController {
@@ -22,4 +19,9 @@ public class MessageController {
     }
     //jak w message chcesz wrzucic kon to wpisujesz
     // localhost::8084/message?message=kon
+    @PostMapping("/notification")
+    public String sendNotification(@RequestBody Notification notification){
+        rabbitTemplate.convertAndSend("test", notification);
+        return "Notyfikacja wysłana";
+    }
 }

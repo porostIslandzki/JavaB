@@ -1,4 +1,4 @@
-package com.first_chat.notification;
+package com.first_chat.receiver;
 
 import java.io.Serializable;
 

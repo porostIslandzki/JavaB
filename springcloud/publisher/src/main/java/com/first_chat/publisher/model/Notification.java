@@ -1,4 +1,4 @@
-package com.first_chat.publisher;
+package com.first_chat.publisher.model;
 
 import java.io.Serializable;
 

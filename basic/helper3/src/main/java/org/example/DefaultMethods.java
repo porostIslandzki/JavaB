@@ -33,6 +33,7 @@ class MathClass implements MathInterface {
         return a + b;
     }
 }
+
 public class DefaultMethods {
     public static void main(String[] args) {
         MathInterface math = (int a, int b) -> a * b;

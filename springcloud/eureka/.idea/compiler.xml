@@ -10,10 +10,14 @@
         <module name="eureka" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="gateway1" target="21" />
+    </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="eureka" options="-parameters" />
+      <module name="gateway1" options="-parameters" />
       <module name="maria2" options="-parameters" />
     </option>
   </component>

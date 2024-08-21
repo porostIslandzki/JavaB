@@ -1,0 +1,5 @@
+Testowy łańcuch znaków: 0
+Testowy łańcuch znaków: 1
+Testowy łańcuch znaków: 2
+Testowy łańcuch znaków: 3
+Testowy łańcuch znaków: 4

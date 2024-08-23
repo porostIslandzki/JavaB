@@ -1,0 +1,73 @@
+Oto szczegółowe instrukcje, jak skonfigurować projekt JavaFX w IntelliJ IDEA, aby można było uruchomić aplikację JavaFX, korzystając z OpenJFX:
+
+### Krok 1: Pobranie JavaFX (OpenJFX)
+1. Wejdź na stronę [OpenJFX](https://gluonhq.com/products/javafx/).
+2. Pobierz odpowiednią wersję JavaFX SDK dla swojego systemu operacyjnego (np. `openjfx-22.0.2_windows-x64_bin-sdk.zip` dla Windows).
+3. Rozpakuj pobrany plik ZIP na swoim komputerze, np. do katalogu `C:\Users\maria\Desktop\git\openjfx-22.0.2_windows-x64_bin-sdk`.
+
+### Krok 2: Konfiguracja IntelliJ IDEA do pracy z JavaFX
+1. Otwórz IntelliJ IDEA i stwórz nowy projekt Java.
+2. Wybierz opcję `New Project` i upewnij się, że masz wybraną wersję JDK (np. OpenJDK 22).
+3. Jeśli tworzysz projekt JavaFX od podstaw, zaznacz `JavaFX` jako technologię podczas tworzenia projektu.
+
+### Krok 3: Dodanie ścieżki do JavaFX SDK w konfiguracji projektu
+1. **Dodanie JavaFX do modułu:**
+   - Kliknij `File` > `Project Structure`.
+   - W zakładce `Modules`, wybierz swój moduł.
+   - Wybierz zakładkę `Dependencies`, kliknij na znak `+` i wybierz `JARs or directories`.
+   - Dodaj katalog `lib` z rozpakowanego OpenJFX SDK, np. `C:\Users\maria\Desktop\git\openjfx-22.0.2_windows-x64_bin-sdk\javafx-sdk-22.0.2\lib`.
+   - Upewnij się, że wybrałaś `Module SDK` jako `Scope`.
+
+2. **Dodanie opcji VM do konfiguracji uruchamiania:**
+   - W IntelliJ przejdź do `Run > Edit Configurations`.
+   - W sekcji `VM options` dodaj następujące parametry:
+   
+     ```plaintext
+     --module-path "C:\Users\maria\Desktop\git\openjfx-22.0.2_windows-x64_bin-sdk\javafx-sdk-22.0.2\lib" --add-modules javafx.controls,javafx.fxml
+     ```
+   - `module-path` wskazuje na katalog `lib`, a `--add-modules` wskazuje moduły, które chcesz załadować.
+
+### Krok 4: Utworzenie prostej klasy Main do testowania JavaFX
+1. Stwórz nową klasę `Main` w projekcie:
+
+   ```java
+   package org.example;
+
+   import javafx.application.Application;
+   import javafx.scene.Scene;
+   import javafx.scene.control.Label;
+   import javafx.scene.layout.StackPane;
+   import javafx.stage.Stage;
+
+   public class Main extends Application {
+       @Override
+       public void start(Stage primaryStage) {
+           Label label = new Label("Hello, JavaFX!");
+           StackPane root = new StackPane(label);
+           Scene scene = new Scene(root, 400, 300);
+           primaryStage.setTitle("JavaFX Test");
+           primaryStage.setScene(scene);
+           primaryStage.show();
+       }
+
+       public static void main(String[] args) {
+           launch(args);
+       }
+   }
+   ```
+
+2. Uruchom projekt klikając `Run` w IntelliJ.
+
+### Krok 5: Rozwiązywanie problemów
+- **Jeśli pojawią się błędy, że moduły JavaFX nie są znalezione:**
+  - Upewnij się, że ścieżka do JavaFX jest poprawna i że wszystkie pliki `.jar` znajdują się w katalogu `lib`.
+  - Sprawdź poprawność opcji `module-path` oraz `--add-modules`.
+  
+- **Jeśli nadal masz problemy:**
+  - Sprawdź, czy pliki `.jar` w katalogu `lib` nie są uszkodzone lub brakuje ich.
+
+### Krok 6: Notatka na przyszłość
+- Zapisz te instrukcje, aby w przyszłości łatwiej było skonfigurować projekt JavaFX.
+- Możesz również skopiować plik projektu IntelliJ jako szablon do przyszłych projektów JavaFX.
+
+Te kroki powinny pomóc w prawidłowej konfiguracji projektu JavaFX w IntelliJ IDEA i uruchomieniu prostego programu JavaFX.

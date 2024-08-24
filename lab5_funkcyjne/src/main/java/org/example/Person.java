@@ -2,9 +2,11 @@ package org.example;
 
 import java.io.*;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalAmount;
 import java.util.*;
 
 public class Person {
@@ -230,8 +232,119 @@ public class Person {
     // (o ile są zdefiniowani). Obiekty powinny zawierać nazwę
     // osoby. Od dziecka do rodziców należy poprowadzić strzałki.
 
-    public String toUML(){
+    public String toUML() {
+        StringBuilder sb = new StringBuilder();
 
+        // Definiowanie obiektu osoby
+        sb.append("object ").append(name).append(" as \"").append(name).append("\"\n");
+
+        // Definiowanie obiektów rodziców, jeśli są zdefiniowani
+        for (Person parent : parents) {
+            sb.append("object ").append(parent.getName()).append(" as \"").append(parent.getName()).append("\"\n");
+            sb.append(name).append(" --> ").append(parent.getName()).append(" : parent\n");
+        }
+
+        return sb.toString();
     }
 
+    //W klasie Person napisz statyczną metodę, która przyjmie
+    // listę osób. Lista powinna zwrócić podobny jak w poprzedni
+    // zadaniu napis. Tym razem powinien on zawierać wszystkie
+    // osoby w liście i ich powiązania.
+
+    public static String listToUML(List<Person> people){
+        StringBuilder sb = new StringBuilder();
+        Set<String> defined = new HashSet<>();
+
+        for(Person p : people){
+            //Dodajemy obiekty osoby, jeśli nie był jeszcze dodany
+            if(!defined.contains(p.getName())){
+                String addP = p.toUML();
+                sb.append(addP);
+                defined.add(p.getName());
+            }
+            //Dodajemy obiekty rodziców, jeśli jeszcze nie byli dodani
+            for(Person parent : p.getParents()){
+                if(!defined.contains(parent.getName())){
+                    sb.append(parent.toUML());
+                    defined.add(parent.getName());
+                }
+            }
+        }
+        return sb.toString();
+    }
+    //W klasie Person napisz statyczną metodę,
+    // która przyjmie listę osób oraz napis substring.
+    // Metoda powinna zwrócić listę osób z listy wejściowej,
+    // ograniczoną do osób, których nazwa zawiera substring.
+
+    public static List<Person> substringCatcher(List<Person> people, String substr){
+        List<Person> peopleWithSubstr = new ArrayList<>();
+        people.stream()
+                .filter(p -> p.getName().contains(substr))
+                .forEach(p -> peopleWithSubstr.add(p));
+        return peopleWithSubstr;
+        //metoda jest ok, ale można użyć od razu
+        // return people.stream()
+        //        .filter(p -> p.getName().contains(substr))
+        //        .collect(Collectors.toList());
+    }
+
+    //W klasie Person napisz statyczną metodę,
+    // która przyjmie listę osób. Metoda powinna zwrócić listę
+    // osób z listy wejściowej, posortowanych według roku urodzenia.
+
+    public static List<Person> birthdaySort(List<Person> people){
+        List<Person> sort = new ArrayList<>(people);
+        Collections.sort(sort, new Comparator<Person>() {
+            @Override
+            public int compare(Person o1, Person o2) {
+                return o1.getBirth().compareTo(o2.getBirth());
+            }
+        }
+        );
+        return sort;
+    } //metoda jest poprawna ale chat gpt jak zwykle drze jape
+    //że można to zrobić łatwiej:
+    // List<Person> sortedList = new ArrayList<>(people);
+    //sortedList.sort(Comparator.comparing(Person::getBirth));
+    //return sortedList;
+
+    //W klasie Person napisz statyczną metodę,
+    // która przyjmie listę osób. Metoda powinna zwrócić listę
+    // zmarłych osób z listy wejściowej, posortowanych malejąco
+    // według długości życia.
+
+    public static List<Person> deadPeople(List<Person> people){
+        List<Person> deadOnes = new ArrayList<>();
+        for(Person p : people){
+            if(p.getDeath() != null){
+                deadOnes.add(p);
+            }
+        }
+        deadOnes.sort((o1, o2) -> {
+            long life1 = ChronoUnit.YEARS.between(o1.getBirth(), o1.getDeath());
+            long life2 = ChronoUnit.YEARS.between(o2.getBirth(), o2.getDeath());
+            return Long.compare(life2, life1); //sortowanie malejące
+        });
+        return deadOnes;
+    }
+
+    //tu piszę komparator do tego gówna na dole
+    public class compBirth implements Comparator<Person>{
+        public int compare(Person a, Person b){
+           return a.getBirth().compareTo(b.getBirth());
+        }
+    }
+
+    //W klasie Person napisz statyczną metodę, która przyjmie
+    // listę osób.
+    //Metoda powinna zwrócić najstarszą żyjącą osobę.
+
+    public static Person oldestOne(List<Person> people){
+        return people.stream()
+                .filter(p -> p.getDeath() == null) //Filtrujemy tylko żyjące osoby
+                .min(Comparator.comparing(Person::getBirth)) //Szukamy najwcześniejszej daty urodzenia
+                .orElse(null); //zwracamy null, jeśli brak żyjących osób
+    }
 }

@@ -3,7 +3,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
-public class PlantUMLRunner {
+public class PlantUMLRunner{
     //Napisz klasę PlantUMLRunner, posiadającą
     // publiczne statyczne metody:
     //- ustawienie ścieżki do uruchamialnego pliku jar.

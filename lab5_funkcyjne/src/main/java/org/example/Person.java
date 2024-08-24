@@ -8,6 +8,8 @@ import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAmount;
 import java.util.*;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 public class Person {
 
@@ -232,20 +234,37 @@ public class Person {
     // (o ile są zdefiniowani). Obiekty powinny zawierać nazwę
     // osoby. Od dziecka do rodziców należy poprowadzić strzałki.
 
-    public String toUML() {
+    //Teraz każa nam to zmodyfikować przed dodanie do jej argumentów obiektu
+    //Function<String, String> postProces lol
+
+    public String toUML(Function<String, String> postProcess, Predicate<Person> condition) {
         StringBuilder sb = new StringBuilder();
 
-        // Definiowanie obiektu osoby
-        sb.append("object ").append(name).append(" as \"").append(name).append("\"\n");
+        // Sprawdzenie warunku dla osoby i ewentualne przetworzenie
+        String personObject = "object " + name + " as \"" + name + "\"\n";
+        if (condition.test(this)) {
+            sb.append(postProcess.apply(personObject));
+        } else {
+            sb.append(personObject);
+        }
 
         // Definiowanie obiektów rodziców, jeśli są zdefiniowani
         for (Person parent : parents) {
-            sb.append("object ").append(parent.getName()).append(" as \"").append(parent.getName()).append("\"\n");
-            sb.append(name).append(" --> ").append(parent.getName()).append(" : parent\n");
+            String parentObject = "object " + parent.getName() + " as \"" + parent.getName() + "\"\n";
+            if (condition.test(parent)) {
+                sb.append(postProcess.apply(parentObject));
+            } else {
+                sb.append(parentObject);
+            }
+
+            String relation = name + " --> " + parent.getName() + " : parent\n";
+            sb.append(relation); // Relacje nie są przekształcane przez postProcess
         }
 
         return sb.toString();
     }
+
+
 
     //W klasie Person napisz statyczną metodę, która przyjmie
     // listę osób. Lista powinna zwrócić podobny jak w poprzedni
@@ -259,14 +278,14 @@ public class Person {
         for(Person p : people){
             //Dodajemy obiekty osoby, jeśli nie był jeszcze dodany
             if(!defined.contains(p.getName())){
-                String addP = p.toUML();
+                String addP = p.toUML(line -> line, person -> true);
                 sb.append(addP);
                 defined.add(p.getName());
             }
             //Dodajemy obiekty rodziców, jeśli jeszcze nie byli dodani
             for(Person parent : p.getParents()){
                 if(!defined.contains(parent.getName())){
-                    sb.append(parent.toUML());
+                    sb.append(parent.toUML(line -> line, person -> true));
                     defined.add(parent.getName());
                 }
             }

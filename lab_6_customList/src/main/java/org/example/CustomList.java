@@ -1,10 +1,12 @@
 package org.example;
 
+import java.util.AbstractList;
 import java.util.LinkedList;
 //Napisz klasę szablonową CustomList implementującą strukturę
 // listy jednokierunkowej ze wskaźnikami na początek i koniec.
 
 class Node<T> {
+
     T data;
     Node next;
     Node(T d) {
@@ -16,7 +18,55 @@ class Node<T> {
 //Lista jednokierunkowa składa się z węzłów("Node"), gdzie każdy węzeł
 //zawiera: 'data' - przechowywaną wartość, 'next' - odniesienie do następnego węzła
 
-public class CustomList <T>  {
+public class CustomList <T> extends AbstractList<T> {
+
+    @Override
+    public boolean add(T t) { // nadpisz metode: ma działać tak samo jak addLast
+        //i zwracać prawdę
+        Node<T> addNode = new Node<>(t);
+        if(head == null){
+            head = addNode;
+            tail = addNode;
+        } else {
+            tail.next = addNode;
+            tail = addNode;
+        }
+        return true;
+    }
+
+    @Override
+    public int size() { //metoda ma zwracać rozmiar tablicy
+        int counter = 0;
+        Node<T> countingNode = head;
+        //tail nie zawsze jest końcem listy, dlatego iterujemy do null
+        while (countingNode != null) {
+            counter++;
+            countingNode = countingNode.next;
+        }
+        return counter;
+    }
+
+    @Override
+    public T get(int index) { //zwraca wartość w węźle o podanym indeksie
+        //rzucimy wyjątkami, kiedy: index będzie ujemny, index będzie większy od zakresu listy
+        if(index < 0) {
+            throw new IndexOutOfBoundsException("Index cannot be negative: " + index);
+        }
+
+        int counter = 0;
+        Node<T> countingNode = head;
+
+        while (countingNode != null){
+            if(counter == index) {
+                return countingNode.data;
+            }
+            counter++;
+            countingNode = countingNode.next;
+        }
+
+        throw new IndexOutOfBoundsException("Index out of range: " + index);
+    }
+
     private Node<T> head; //wskaźnik na pierwszy węzeł
     private Node<T> tail; //wskaźnik na ostatni węzeł
 
@@ -112,6 +162,11 @@ public class CustomList <T>  {
 
         return value;
     }
+
+    //Napisz metodę: Iterator<T> iterator() -
+    // zwracającą iterator do listy. Zdefiniuj w niej iterator
+
+    
 
 
 }

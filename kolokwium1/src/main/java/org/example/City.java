@@ -1,11 +1,8 @@
 package org.example;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.time.LocalTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class City {
 
@@ -38,6 +35,14 @@ public class City {
 
     public double getLongitude() {
         return longitude;
+    }
+
+    public LocalTime getLocalTime() {
+        return localTime;
+    }
+
+    public LocalTime getLocalMeanTime() {
+        return localMeanTime;
     }
 
     // Metoda do konwersji współrzędnych geograficznych z formatu tekstowego na double
@@ -95,4 +100,72 @@ public class City {
 
         return localMeanTime;
     }
+
+    //komparator dwóch miast. Wynik sortowania ustawia na początku kolekcji
+    //miasta, których różnica między czasem miejscowym
+    //a czasem wynikającym ze strefy czasowej jest największa
+
+    public LocalTime setGetDifferenceTime() {
+        int diffHours = Math.abs(getLocalMeanTime().getHour() - getLocalTime().getHour());
+        int diffMinutes = Math.abs(getLocalMeanTime().getMinute() - getLocalTime().getMinute());
+        int diffSeconds = Math.abs(getLocalMeanTime().getSecond() - getLocalTime().getSecond());
+        return LocalTime.of(diffHours, diffMinutes, diffSeconds);
+    }
+
+
+    public static List<City> worstTimeZoneFit(List<City> cities){
+        Comparator<City> comp1 = (c1,c2) -> {
+            LocalTime diff1 = c1.setGetDifferenceTime();
+            LocalTime diff2 = c2.setGetDifferenceTime();
+            if (diff1.isBefore(diff2)) return 1;
+            if(diff1.isAfter(diff2)) return -1;
+            else return 0;
+        };
+        cities.sort(comp1);
+        return cities;
+    }
+
+    //napisz publiczną metodę statyczną generateAnalogClockSvg, która
+    //przyjmie listę obiektów City oraz obiekt AnalogClock. Metoda powinna
+    //założyć katalog o nazwie będącej wynikiem funkcji toString obiektu
+    //zegara. W katalogu, dla każdego miasta z listy, należy utworzyć plik Svg
+    //o nazwie odpowiadającej nazwie miasta. Pliki powinny zawierać
+    //wynik działania metody toSvg zegara w kolejnych miastach.
+
+    public static void generateAnalogClock(List<City> cities, AnalogClock analogClock){
+        // Upewnienie się, że czas jest ustawiony przed wywołaniem `toString`
+        analogClock.setTime(LocalTime.now());
+
+        // Tworzenie katalogu na podstawie nazwy zegara
+        String directoryName = analogClock.toString();
+        File directory = new File("C:\\Users\\maria\\Desktop\\git\\kolokwium1\\src\\main\\resources\\" + directoryName);
+        if (!directory.exists()) {
+            if (directory.mkdir()) {
+                System.out.println("Directory is created!");
+            } else {
+                System.out.println("Failed to create directory!");
+            }
+        }
+
+        for (City city : cities) {
+            // Ustawienie czasu na zegarze dla danego miasta
+            LocalTime cityTime = city.localMeanTime(LocalTime.now());
+            analogClock.setTime(cityTime);
+
+            // Nazwa pliku SVG odpowiadająca nazwie miasta
+            String fileName = city.getCapital() + ".svg";
+            File svgFile = new File(directory, fileName);
+
+            try (FileWriter fw = new FileWriter(svgFile)) {
+                // Generowanie i zapisanie SVG do pliku
+                analogClock.toSvg(svgFile.getPath());
+                System.out.println("File " + fileName + " created for city " + city.getCapital());
+            } catch (IOException e) {
+                System.err.println("Failed to create file for city " + city.getCapital() + ": " + e.getMessage());
+            }
+        }
+    }
+
+
+
 }

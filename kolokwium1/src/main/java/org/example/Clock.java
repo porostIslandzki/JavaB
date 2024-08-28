@@ -50,8 +50,13 @@ public abstract class Clock {
 
     @Override
     public String toString() {
-        return "Clock{" +
-                "localTime=" + localTime.format(dateTimeFormatter) +
-                '}';
+        // Możesz zmodyfikować nazwę tak, aby była prostsza
+        // Na przykład: "AnalogClock_" + godzina + "_" + minuta + "_" + sekunda
+        if (this.localTime == null) {
+            this.localTime = LocalTime.now();
+        }
+        return String.format("AnalogClock_%02d-%02d-%02d", localTime.getHour(), localTime.getMinute(), localTime.getSecond());
     }
+
+
 }

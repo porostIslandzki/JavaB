@@ -1,8 +1,5 @@
 package music;
 
-import pl.umcs.oop.auth.Account;
-import pl.umcs.oop.database.DatabaseConnection;
-
 import javax.naming.AuthenticationException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -17,7 +14,7 @@ public class ListenerAccount extends Account {
     public Playlist createPlaylist(List<Integer> songIds) throws SQLException {
         Playlist playlist = new Playlist();
         for(var id: songIds) {
-            if(!hasSong(id)) {
+            if(!Persistence.hasSong(id)) {
                 buySong(id);
             }
             var optionalSong = Song.Persistence.read(id);

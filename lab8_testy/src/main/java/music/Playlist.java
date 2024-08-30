@@ -22,6 +22,9 @@ public class Playlist extends ArrayList<Song> {
 
     public Song atSecond(int totalSeconds) throws IndexOutOfBoundsException {
         int seconds = 0;
+        if(totalSeconds < 0){
+            throw  new IndexOutOfBoundsException("Czas ujemny");
+        }
 
         for (Song song : this) { // this odnosi się do playlisty (ArrayList<Song>)
             seconds += song.time();
@@ -30,6 +33,6 @@ public class Playlist extends ArrayList<Song> {
             }
         }
         // Jeśli nie znaleziono utworu w podanym przedziale czasu
-        throw new IndexOutOfBoundsException("No song found at the specified time.");
+        throw new IndexOutOfBoundsException("Czas wykracza poza czas trwania playlisty.");
     }
 }

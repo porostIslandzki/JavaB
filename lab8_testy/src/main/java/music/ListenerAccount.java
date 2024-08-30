@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Optional;
 
 public class ListenerAccount extends Account {
     public ListenerAccount(int id, String name) {
@@ -13,19 +14,30 @@ public class ListenerAccount extends Account {
 
     public Playlist createPlaylist(List<Integer> songIds) throws SQLException {
         Playlist playlist = new Playlist();
-        for(var id: songIds) {
-            if(!Persistence.hasSong(id)) {
+        for (var id : songIds) {
+            if (!Persistence.hasSong(this.id, id)) {
                 buySong(id);
             }
             var optionalSong = Song.Persistence.read(id);
-            if(optionalSong.isPresent())
+            if (optionalSong.isPresent()) {
                 playlist.add(optionalSong.get());
-            else
-                throw new SQLException();
+            } else {
+                throw new SQLException("Song not found with ID: " + id);
+            }
         }
         return playlist;
     }
 
+    private void buySong(int songId) throws SQLException {
+        int credits = Persistence.getCredits(this.id);
+        int songCost = 10; // Przykładowy koszt piosenki
+        if (credits >= songCost) {
+            Persistence.addCredits(this.id, -songCost);
+            Persistence.addSong(this.id, songId);
+        } else {
+            throw new SQLException("Not enough credits to buy song with ID: " + songId);
+        }
+    }
 
     public static class Persistence {
         public static void init() throws SQLException {
@@ -47,12 +59,12 @@ public class ListenerAccount extends Account {
             }
         }
 
-        public static int register(String username, String password) throws SQLException{
+        public static int register(String username, String password) throws SQLException {
             try {
                 int id = Account.Persistence.register(username, password);
                 String sql = "INSERT INTO listener_account(id_account, credits) VALUES (?, 0)";
                 PreparedStatement statement = DatabaseConnection.getConnection().prepareStatement(sql);
-                statement.setInt(1,id);
+                statement.setInt(1, id);
                 statement.executeUpdate();
                 return id;
             } catch (SQLException | RuntimeException e) {
@@ -63,19 +75,20 @@ public class ListenerAccount extends Account {
         private static int getCredits(int id) throws SQLException {
             String sql = "SELECT credits FROM listener_account WHERE id_account = ?";
             PreparedStatement statement = DatabaseConnection.getConnection().prepareStatement(sql);
-            statement.setInt(1,id);
+            statement.setInt(1, id);
             ResultSet resultSet = statement.executeQuery();
-            if(resultSet.next()) {
+            if (resultSet.next()) {
                 return resultSet.getInt("credits");
+            } else {
+                throw new SQLException("No credits found for account ID: " + id);
             }
-            else throw new SQLException();
         }
 
         private static void addCredits(int id, int amount) throws SQLException {
             int currentCredits = getCredits(id);
             String sql = "UPDATE listener_account SET credits = ? WHERE id_account = ?";
             PreparedStatement statement = DatabaseConnection.getConnection().prepareStatement(sql);
-            statement.setInt(1,currentCredits + amount);
+            statement.setInt(1, currentCredits + amount);
             statement.setInt(2, id);
             statement.executeUpdate();
         }
@@ -100,8 +113,5 @@ public class ListenerAccount extends Account {
             Account account = Account.Persistence.authenticate(username, password);
             return new ListenerAccount(account.getId(), account.getUsername());
         }
-
     }
-
-
 }

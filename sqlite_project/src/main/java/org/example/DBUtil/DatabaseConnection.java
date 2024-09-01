@@ -6,7 +6,7 @@ import java.sql.SQLException;
 
 public class DatabaseConnection {
     //tu będę się łączyć z tabelą school.sqlite
-    private static final String SQCONN = "jdbc:sqlite:C:\\Users\\maria\\Desktop\\git\\management_sysem_task\\src\\main\\java\\org\\example\\school.sqlite";
+    private static final String SQCONN = "jdbc:sqlite:src/main/java/org/example/school.sqlite";
 
     public static Connection getConnection() throws SQLException {
         try {

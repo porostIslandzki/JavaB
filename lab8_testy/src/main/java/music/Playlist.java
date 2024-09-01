@@ -1,8 +1,10 @@
 package music;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.NoSuchElementException;
 
 public class Playlist extends ArrayList<Song> {
@@ -35,4 +37,5 @@ public class Playlist extends ArrayList<Song> {
         // Jeśli nie znaleziono utworu w podanym przedziale czasu
         throw new IndexOutOfBoundsException("Czas wykracza poza czas trwania playlisty.");
     }
+
 }

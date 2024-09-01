@@ -52,11 +52,14 @@ public class LoginController implements Initializable {
     public void login(ActionEvent event){
         //sprawdzamy czy udało się zalogować
         try {
+            System.out.println("Username: " + this.username.getText());
+            System.out.println("Password: " + this.password.getText());
+            System.out.println("Option: " + this.combobox.getValue());
             //to sprawdzamy tą metodę boolean z loginmodelclass ze
             //string password and option
             if(this.loginModelClass.isLogin(this.username.getText(), this.password.getText(), ((Option)this.combobox.getValue()).toString())){
-                Stage stage = (Stage) this.loginbutton.getScene().getWindow();
-                stage.close();
+               // Stage stage = (Stage) this.loginbutton.getScene().getWindow();
+                //stage.close();
                 switch(((Option)this.combobox.getValue()).toString()) {
                     case "Admin":
                         adminLogin(); //metoda do zalogowania się admina
@@ -73,15 +76,12 @@ public class LoginController implements Initializable {
         }
     }
 
-    public void studentLogin(){
+    public void studentLogin() {
+        System.out.println("Opening Student Dashboard");
         try {
             Stage userStage = new Stage();
-            //we need to load the fxmlStudent file
             FXMLLoader loader = new FXMLLoader();
-            Pane root = (Pane) loader.load(getClass().getResource("C:\\Users\\maria\\Desktop\\git\\sqlite_project\\src\\main\\java\\org\\example\\students\\studentFXML.fxml").openStream());
-
-            //potrzebujemy kontrolera
-            StudentsController studentsController = (StudentsController) loader.getController();
+            Pane root = (Pane) loader.load(getClass().getResource("/students/studentFXML.fxml").openStream());
 
             Scene scene = new Scene(root);
             userStage.setScene(scene);
@@ -89,30 +89,30 @@ public class LoginController implements Initializable {
             userStage.setResizable(false);
             userStage.show();
 
-        } catch (IOException ex){
-            ex.printStackTrace();
-        }
-
-    } //musimy stworzyć pakiet dla każdego z nich
-
-    public void adminLogin(){
-        try {
-            Stage adminStage = new Stage();
-            FXMLLoader adminLoader = new FXMLLoader();
-            Pane adminroot = (Pane) adminLoader.load(getClass().getResource("C:\\Users\\maria\\Desktop\\git\\sqlite_project\\src\\main\\java\\org\\example\\admin\\Admin.fxml").openStream());
-
-            AdminController adminController = (AdminController) adminLoader.getController();
-
-            Scene scene = new Scene(adminroot);
-            adminStage.setScene(scene);
-            adminStage.setTitle("Admin DashBoard");
-            adminStage.setResizable(false);
-            adminStage.show();
-
-        } catch (IOException ex ){
+        } catch (IOException ex) {
             ex.printStackTrace();
         }
     }
+ //musimy stworzyć pakiet dla każdego z nich
+
+    public void adminLogin() {
+        System.out.println("Opening Admin Dashboard");
+        try {
+            Stage adminStage = new Stage();
+            FXMLLoader adminLoader = new FXMLLoader();
+            Pane adminroot = (Pane) adminLoader.load(getClass().getResource("/admin/Admin.fxml").openStream());
+
+            Scene scene = new Scene(adminroot);
+            adminStage.setScene(scene);
+            adminStage.setTitle("Admin Dashboard");
+            adminStage.setResizable(false);
+            adminStage.show();
+
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+    }
+
     //sprawdza czy username is for student czy for admin
 
 

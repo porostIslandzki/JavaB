@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.admin.AdminController">
+    <children>
+        <TabPane prefHeight="600.0" prefWidth="800.0" tabClosingPolicy="UNAVAILABLE">
+            <tabs>
+                <Tab text="Students">
+                    <AnchorPane>
+                        <children>
+                            <HBox layoutX="10.0" layoutY="10.0" spacing="20.0" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0">
+
+                                <!-- VBox for Add Student Form -->
+                                <VBox alignment="TOP_LEFT" prefWidth="200.0" spacing="10.0">
+                                    <Label text="Add Student" />
+
+                                    <!-- TextFields for Student Details -->
+                                    <TextField fx:id="id" promptText="ID" />
+                                    <TextField fx:id="firstname" promptText="First Name" />
+                                    <TextField fx:id="lastname" promptText="Last Name" />
+                                    <TextField fx:id="email" promptText="Email" />
+
+                                    <!-- DatePicker for DOB -->
+                                    <DatePicker fx:id="dob" promptText="Date of Birth" />
+
+                                    <!-- Buttons for Add Entry, Clear Form, Load Data -->
+                                    <Button text="Add Entry" />
+                                    <Button fx:id="clearFields" text="Clear Form" />
+                                    <Button text="Load Data" />
+                                </VBox>
+
+                                <!-- TableView with 5 columns -->
+                                <TableView fx:id="studenttable" prefHeight="400.0" prefWidth="550.0">
+                                    <columns>
+                                        <TableColumn fx:id="idcolumn" prefWidth="75.0" text="ID" />
+                                        <TableColumn fx:id="firstnamecolumn" prefWidth="100.0" text="First Name" />
+                                        <TableColumn fx:id="lastnamecolumn" prefWidth="100.0" text="Last Name" />
+                                        <TableColumn fx:id="emailcolumn" prefWidth="125.0" text="Email" />
+                                        <TableColumn fx:id="dobcolumn" prefWidth="100.0" text="DOB" />
+                                    </columns>
+                                </TableView>
+
+                            </HBox>
+                        </children>
+                    </AnchorPane>
+                </Tab>
+            </tabs>
+        </TabPane>
+    </children>
+</AnchorPane>

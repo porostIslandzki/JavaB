@@ -26,34 +26,31 @@ public class LoginModelClass {
     }
 
     public boolean isLogin(String user, String pass, String opt) throws Exception {
-
         PreparedStatement pr = null;
         ResultSet rs = null;
-
-        String sql = "SELECT * FROM login where username = ? and password = ? and division = ?"; //wybierasz username coś z tabeli login
+        String sql = "SELECT * FROM login where username = ? and password = ? and division = ?";
 
         try {
             pr = this.connection.prepareStatement(sql);
-            pr.setString(1, user); //sprawdzamy czy username z database jest takie samo jak user przekazane do metody
+            pr.setString(1, user);
             pr.setString(2, pass);
-            pr.setString(3, opt); //division
+            pr.setString(3, opt);
 
             rs = pr.executeQuery();
 
-            boolean boll1;
-
-            if(rs.next()) {
+            if (rs.next()) {
+                System.out.println("Login successful in database.");
                 return true;
+            } else {
+                System.out.println("Login failed in database.");
+                return false;
             }
-            return false;
         } catch (SQLException ex) {
+            ex.printStackTrace();
             return false;
-        }
-        //you need to close the connection after you create the connection
-
-        finally {
-            pr.close();
-            rs.close();
+        } finally {
+            if (pr != null) pr.close();
+            if (rs != null) rs.close();
         }
     }
 

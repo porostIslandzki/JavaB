@@ -176,6 +176,51 @@ public class Image {
         Instant end = Instant.now();
         System.out.println(Duration.between(start, end));
     }
+
+    //Napisz metodę, która w oparciu o pulę wątków
+    // obliczy histogram wybranego kanału obrazu.
+
+    public int[] createHistogramRed() {
+        int numberOfThreads = Runtime.getRuntime().availableProcessors();
+        ExecutorService executor = Executors.newFixedThreadPool(numberOfThreads);
+
+        int[] histogram = new int[256]; // Główny histogram o rozmiarze 256
+
+        // Dzielenie pracy na wątki: każdy wątek zajmuje się pewnym zakresem wierszy
+        int rowsPerThread = image.getHeight() / numberOfThreads;
+
+        for (int thread = 0; thread < numberOfThreads; thread++) {
+            int startRow = thread * rowsPerThread;
+            int endRow = (thread == numberOfThreads - 1) ? image.getHeight() : startRow + rowsPerThread;
+
+            // Tworzymy zadanie dla wątku
+            executor.submit(() -> {
+                int[] localHistogram = new int[256]; // Lokalny histogram dla każdego wątku
+                for (int i = startRow; i < endRow; i++) { // Przetwarzanie każdego wiersza w zakresie
+                    for (int j = 0; j < image.getWidth(); j++) { // Przetwarzanie każdego piksela w wierszu
+                        int pixel = image.getRGB(j, i); // Pobieramy RGB piksela
+                        int red = (pixel >> 16) & 0xff; // Wyodrębniamy wartość czerwonego kanału
+                        localHistogram[red]++; // Aktualizujemy lokalny histogram
+                    }
+                }
+                synchronized (histogram) { // Synchronizujemy dostęp do głównego histogramu
+                    for (int i = 0; i < histogram.length; i++) {
+                        histogram[i] += localHistogram[i]; // Łączymy lokalny histogram z głównym histogramem
+                    }
+                }
+            });
+        }
+
+        // Zamykamy pulę wątków i czekamy, aż wszystkie wątki zakończą pracę
+        executor.shutdown();
+        try {
+            executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+
+        return histogram;
+    }
 }
 
 

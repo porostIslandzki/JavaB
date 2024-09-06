@@ -4,6 +4,10 @@ import java.io.*;
 import java.net.Socket;
 
 public class Klient implements Runnable{
+    //zadanie 3a: w klasie Klient musimy wprowadzić obsługę loginu
+    //po połączeniu się z serwerem. Klient powinien najpierw wysłać
+    //login, a dopiero potem rozpocząć wysyłanie wiadomości
+
     private final Socket socket;
     private final BufferedReader reader;
     private final PrintWriter writer;
@@ -33,6 +37,11 @@ public class Klient implements Runnable{
         writer.println(message);
     }
 
+    public void close() throws IOException {
+        socket.close();
+    }
+
+
 }
 
 class Main {
@@ -45,10 +54,31 @@ class Main {
         BufferedReader reader = new BufferedReader(
                 new InputStreamReader(System.in));
 
-        while (true){
+        //zaraz po uruchomieniu klienta proszę użytkownika
+        //o podanie loginu, który zostanie przesłany do
+        //serwera
+        System.out.println("Enter your login: ");
+        String login = reader.readLine();
+        klient.send(login); //Wyślij login do serwera jako pierwszą wiadomość
+
+        while (true) {
             String message = reader.readLine();
+            if (message.equalsIgnoreCase("/quit")) { //dodaję możliwość zamknięcia
+                // połączenia komendą quit
+                klient.send("Client has left the chat.");
+                klient.close();  // Zamknięcie połączenia
+                break;
+            }
             klient.send(message);
         }
 
     }
 }
+
+//Niech działanie klienta rozpoczyna się zawsze od wpisania
+// loginu. Login powinien zostać przesłany serwerowi w
+// postaci sformatowanej wiadomości. Zakładamy, że użytkownicy
+// podadzą unikalne loginy. W chwili zalogowania pozostali
+// użytkownicy czata powinni otrzymać informację o dołączeniu
+// użytkownika, a chwili wyłączenia klienta o opuszczeniu
+// przez niego czatu.

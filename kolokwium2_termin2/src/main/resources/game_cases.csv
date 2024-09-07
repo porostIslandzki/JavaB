@@ -1,0 +1,5 @@
+boardState1, boardState2, boardState3, result
+X,O,X,O,X,O,X,O,X,x_won
+X,O,X,O,X,O,O,X,O,draw
+O,O,X,X,O,X,O,X,O,o_won
+X,O,X,EMPTY,EMPTY,EMPTY,X,O,X,game_in_progress

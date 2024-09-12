@@ -1,0 +1,214 @@
+Aby napisać kontroler w aplikacji webowej (np. przy użyciu Spring Boot), który wyszukuje odpowiedni wiersz w bazie danych na podstawie nazwy użytkownika i numeru elektrody, a następnie zwraca stronę HTML zawierającą te dane oraz obrazek, należy wykonać kilka kroków.
+
+### Krok 1: Założenia
+- Dane przechowywane są w tabeli `usereeg` z kolumnami: `username`, `chartNumber` (numer elektrody) oraz `chart` (obraz w formacie Base64).
+- Użytkownik będzie mógł podać w URL-u nazwę użytkownika oraz numer elektrody.
+- Kontroler wyszuka odpowiedni rekord w bazie i zwróci stronę HTML z wynikami.
+
+### Krok 2: Konfiguracja projektu Spring Boot
+Najpierw upewnij się, że masz odpowiednią konfigurację projektu Spring Boot. Zakładam, że masz już skonfigurowane zależności do Spring Data JPA oraz Thymeleaf do generowania widoków.
+
+#### Przykład zależności w `pom.xml`:
+
+```xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-web</artifactId>
+</dependency>
+
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-data-jpa</artifactId>
+</dependency>
+
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-thymeleaf</artifactId>
+</dependency>
+
+<dependency>
+    <groupId>org.xerial</groupId>
+    <artifactId>sqlite-jdbc</artifactId>
+    <version>3.36.0.3</version>
+</dependency>
+```
+
+### Krok 3: Tworzenie encji i repozytorium
+
+#### Encja `UserEEG`:
+Zakładamy, że dane są przechowywane w tabeli `usereeg`.
+
+```java
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Column;
+
+@Entity
+public class UserEEG {
+
+    @Id
+    private Long id;
+
+    @Column(nullable = false)
+    private String username;
+
+    @Column(nullable = false)
+    private int chartNumber;
+
+    @Column(columnDefinition = "TEXT")
+    private String chart; // Base64 representation of the chart
+
+    // Gettery i settery
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public int getChartNumber() {
+        return chartNumber;
+    }
+
+    public void setChartNumber(int chartNumber) {
+        this.chartNumber = chartNumber;
+    }
+
+    public String getChart() {
+        return chart;
+    }
+
+    public void setChart(String chart) {
+        this.chart = chart;
+    }
+}
+```
+
+#### Repozytorium `UserEEGRepository`:
+Tworzymy repozytorium, które pozwala wyszukiwać dane na podstawie nazwy użytkownika i numeru elektrody.
+
+```java
+import org.springframework.data.jpa.repository.JpaRepository;
+import java.util.Optional;
+
+public interface UserEEGRepository extends JpaRepository<UserEEG, Long> {
+    Optional<UserEEG> findByUsernameAndChartNumber(String username, int chartNumber);
+}
+```
+
+### Krok 4: Tworzenie kontrolera
+
+Kontroler obsługujący żądanie w postaci `/eeg/{username}/{chartNumber}`, który wyszuka w bazie odpowiednie dane i zwróci stronę HTML z nazwą użytkownika, numerem elektrody i obrazem.
+
+```java
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import java.util.Optional;
+
+@Controller
+public class EEGController {
+
+    @Autowired
+    private UserEEGRepository userEEGRepository;
+
+    @GetMapping("/eeg/{username}/{chartNumber}")
+    public String getUserEEG(
+            @PathVariable("username") String username,
+            @PathVariable("chartNumber") int chartNumber,
+            Model model) {
+
+        // Wyszukaj dane w bazie na podstawie nazwy użytkownika i numeru elektrody
+        Optional<UserEEG> userEEGOptional = userEEGRepository.findByUsernameAndChartNumber(username, chartNumber);
+
+        if (userEEGOptional.isPresent()) {
+            UserEEG userEEG = userEEGOptional.get();
+
+            // Dodaj dane do modelu
+            model.addAttribute("username", userEEG.getUsername());
+            model.addAttribute("chartNumber", userEEG.getChartNumber());
+            model.addAttribute("chart", userEEG.getChart()); // Obraz w formacie Base64
+
+            // Zwróć widok (stronę HTML)
+            return "eegPage";
+        } else {
+            // Jeśli nie znaleziono danych, zwróć stronę z błędem
+            return "errorPage";
+        }
+    }
+}
+```
+
+### Krok 5: Tworzenie widoku (Thymeleaf)
+
+Stwórz widok HTML (`eegPage.html`), który wyświetli nazwę użytkownika, numer elektrody oraz obrazek wygenerowany na podstawie danych Base64.
+
+#### `src/main/resources/templates/eegPage.html`:
+
+```html
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>EEG Chart</title>
+</head>
+<body>
+    <h1>EEG Chart for User: <span th:text="${username}"></span></h1>
+    <p>Electrode Number: <span th:text="${chartNumber}"></span></p>
+
+    <!-- Wyświetlenie obrazka z Base64 -->
+    <img th:src="'data:image/png;base64,' + ${chart}" alt="EEG Chart">
+
+</body>
+</html>
+```
+
+### Krok 6: Obsługa braku danych
+
+Dodatkowo, warto obsłużyć sytuację, w której nie znaleziono danych dla podanego użytkownika i numeru elektrody. Możesz stworzyć stronę `errorPage.html`:
+
+#### `src/main/resources/templates/errorPage.html`:
+
+```html
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Error</title>
+</head>
+<body>
+    <h1>Error: No data found for the given user and electrode number.</h1>
+</body>
+</html>
+```
+
+### Wyjaśnienie działania:
+1. **Kontroler**:
+   - Po otrzymaniu żądania z nazwą użytkownika i numerem elektrody, kontroler szuka odpowiedniego rekordu w bazie danych za pomocą metody `findByUsernameAndChartNumber()`.
+   - Jeśli rekord zostanie znaleziony, dane (nazwa użytkownika, numer elektrody, obrazek w Base64) są przekazywane do widoku (strony HTML).
+   - Jeśli nie ma takiego rekordu, kontroler zwraca stronę z komunikatem o błędzie.
+
+2. **Thymeleaf**:
+   - Widok HTML wykorzystuje silnik szablonów Thymeleaf do dynamicznego wstawiania danych (nazwa użytkownika, numer elektrody i obrazek w Base64) do strony HTML.
+
+3. **Obrazek**:
+   - Obrazek EEG jest zapisany w formacie Base64 w bazie danych i zostaje wstawiony w tagu `<img>` jako dane Base64. Dzięki temu przeglądarka automatycznie wyświetla obrazek.
+
+### Testowanie:
+
+Aby przetestować tę funkcjonalność, uruchom serwer aplikacji i otwórz URL w przeglądarce w formacie:
+
+```
+http://localhost:8080/eeg/janKowalski/1
+```
+
+Gdzie `janKowalski` to nazwa użytkownika, a `1` to numer elektrody. Aplikacja powinna zwrócić stronę HTML z odpowiednimi danymi.
